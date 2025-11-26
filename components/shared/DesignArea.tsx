@@ -48,20 +48,16 @@ const DesignArea = () => {
       </div>
 
       <div className="flex justify-center">
-        {selectedView === 'front' && (
-          <Card>
-            <CardContent>
+        <Card className="shadow-none">
+          <CardContent>
+            <div className={selectedView === 'front' ? 'block' : 'hidden'}>
               <TshirtCanvasFront svgPath={getSvgPath('front')} />
-            </CardContent>
-          </Card>
-        )}
-        {selectedView === 'back' && (
-          <Card>
-            <CardContent>
+            </div>
+            <div className={selectedView === 'back' ? 'block' : 'hidden'}>
               <TshirtCanvasBack svgPath={getSvgPath('back')} />
-            </CardContent>
-          </Card>
-        )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
