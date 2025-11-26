@@ -7,6 +7,7 @@ import {
   Download,
   ImageIcon,
   Palette,
+  Pencil,
   RotateCcw,
   Shirt,
   Slash,
@@ -286,7 +287,7 @@ export default function Home() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-40 border-b bg-card">
-        <div className="mx-auto max-w-7xl px-4 py-3 sm:py-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-[1920px] px-4 py-3 sm:py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-2 sm:gap-4">
             <div className="flex items-center gap-2">
               <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-primary text-white">
@@ -314,14 +315,14 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-3">
+      <main className="mx-auto max-w-[1920px] px-4 py-6 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-4">
           {/* Canvas Area */}
-          <div className="lg:col-span-2 space-y-4">
+          <div className="lg:col-span-3 grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* 3D Viewer */}
             <div className="rounded-lg border bg-card p-4 sm:p-6">
-              <h2 className="mb-4 flex items-center gap-2 text-base sm:text-lg font-semibold">
-                <View className="h-4 w-4 sm:h-5 sm:w-5" />
+              <h2 className="mb-4 flex justify-center items-center gap-2 text-base sm:text-lg">
+                <View className="size-4 sm:size-5" />
                 Vista 3D del Modelo
               </h2>
               <ThreeDViewer
@@ -334,7 +335,10 @@ export default function Home() {
 
             {/* Design Area */}
             <div className="rounded-lg border bg-card p-4 sm:p-6">
-              <h2 className="mb-4 text-base sm:text-lg font-semibold">Área de Diseño</h2>
+              <h2 className="mb-4 flex justify-center items-center gap-2 text-base sm:text-lg">
+                <Pencil className="size-4 sm:size-5" />
+                Área de Diseño
+              </h2>
               <DesignArea />
             </div>
           </div>
@@ -345,7 +349,7 @@ export default function Home() {
               {/* Shirt Color */}
               <div>
                 <h3 className="mb-3 flex items-center gap-2 text-sm sm:text-base font-semibold text-foreground">
-                  <Palette className="h-4 w-4" />
+                  <Palette className="size-4" />
                   Color del Polo
                 </h3>
                 <ColorPicker
@@ -376,7 +380,7 @@ export default function Home() {
                     <button
                       key={value}
                       onClick={() => handleTypeChange(value)}
-                      className={`flex flex-col items-center gap-1 rounded-lg border-2 px-2 py-2 sm:px-3 text-center transition-all ${
+                      className={`flex flex-col items-center gap-1 rounded-lg border-2 px-2 py-2 sm:px-3 text-center transition-all cursor-pointer ${
                         selectedType === value
                           ? 'border-primary bg-secondary'
                           : 'border-border hover:border-primary/50'
@@ -544,10 +548,10 @@ export default function Home() {
                 <>
                   <Separator />
                   <div className="space-y-2 sm:space-y-3">
-                    <Label className="text-base sm:text-lg font-bold">
+                    <Label className="text-sm sm:text-base font-semibold">
                       Elementos ({canvasObjects.length})
                     </Label>
-                    <div className="max-h-64 space-y-2 overflow-y-auto">
+                    <div className="max-h-64 space-y-2 overflow-y-auto mt-3">
                       {canvasObjects.map((obj, index) => {
                         const objId = `obj-${index}`
                         const isSelected = selectedObject === obj
