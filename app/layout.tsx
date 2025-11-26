@@ -15,8 +15,8 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'Next.js + shadcn/ui Starter',
-  description: 'Starter template with Next.js 15, Tailwind CSS v4, and shadcn/ui.',
+  title: 'Arte en Tela - Diseña tu Polo',
+  description: '',
   icons: {
     icon: [
       { url: '/favicon-light.svg', media: '(prefers-color-scheme: light)', type: 'image/svg+xml' },
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
 
 export function generateViewport() {
   return {
-    themeColor: [{ color: 'oklch(0.141 0.005 285.823)' }],
+    themeColor: [{ color: 'oklch(1 0 0)' }],
   }
 }
 
@@ -44,7 +44,7 @@ export default function RootLayout({
       <body className={`${inter.className} antialiased`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
+          defaultTheme="light"
           disableTransitionOnChange
           enableColorScheme
         >

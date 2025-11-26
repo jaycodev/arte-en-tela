@@ -1,133 +1,501 @@
-import { FileText } from 'lucide-react'
+'use client'
 
+import { useState } from 'react'
+
+import { Download, ImageIcon, Palette, Pen, RotateCcw, Shirt, Trash2, Type } from 'lucide-react'
+import type React from 'react'
+
+import ColorPicker from '@/components/shared/color-picker'
+import DesignCanvas from '@/components/shared/design-canvas'
+import NecklineSelector from '@/components/shared/neckline-selector'
+import TextEditor from '@/components/shared/text-editor'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 
 export default function Home() {
+  const [view, setView] = useState<'front' | 'back'>('front')
+  const [shirtColor, setShirtColor] = useState('#ffffff')
+  const [neckline, setNeckline] = useState<'round' | 'v' | 'polo'>('round')
+  const [designs, setDesigns] = useState<
+    Array<{ id: string; text: string; color: string; size: number; type: 'front' | 'back' }>
+  >([])
+  const [selectedDesign, setSelectedDesign] = useState<string | null>(null)
+  const [showTextEditor, setShowTextEditor] = useState(false)
+  const [lines, setLines] = useState<
+    Array<{
+      id: string
+      x1: number
+      y1: number
+      x2: number
+      y2: number
+      color: string
+      width: number
+      type: 'front' | 'back'
+    }>
+  >([])
+  const [lineColor, setLineColor] = useState('#000000')
+  const [lineWidth, setLineWidth] = useState(2)
+  const [images, setImages] = useState<
+    Array<{
+      id: string
+      src: string
+      x: number
+      y: number
+      size: number
+      type: 'front' | 'back'
+    }>
+  >([])
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [showImageUploader, setShowImageUploader] = useState(false)
+
+  const addText = (text: string, color: string) => {
+    const newDesign = {
+      id: Date.now().toString(),
+      text,
+      color,
+      size: 24,
+      type: view as 'front' | 'back',
+    }
+    setDesigns([...designs, newDesign])
+    setSelectedDesign(newDesign.id)
+  }
+
+  const updateDesign = (id: string, updates: Partial<(typeof designs)[0]>) => {
+    setDesigns(designs.map((d) => (d.id === id ? { ...d, ...updates } : d)))
+  }
+
+  const deleteDesign = (id: string) => {
+    setDesigns(designs.filter((d) => d.id !== id))
+    setSelectedDesign(null)
+  }
+
+  const addLine = () => {
+    const newLine = {
+      id: Date.now().toString(),
+      x1: 80,
+      y1: 150,
+      x2: 120,
+      y2: 150,
+      color: lineColor,
+      width: lineWidth,
+      type: view as 'front' | 'back',
+    }
+    setLines([...lines, newLine])
+  }
+
+  const updateLine = (id: string, updates: Partial<(typeof lines)[0]>) => {
+    setLines(lines.map((l) => (l.id === id ? { ...l, ...updates } : l)))
+  }
+
+  const deleteLine = (id: string) => {
+    setLines(lines.filter((l) => l.id !== id))
+  }
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        const src = event.target?.result as string
+        const newImage = {
+          id: Date.now().toString(),
+          src,
+          x: 100,
+          y: 140,
+          size: 60,
+          type: view as 'front' | 'back',
+        }
+        setImages([...images, newImage])
+        setSelectedImage(newImage.id)
+        setShowImageUploader(false)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const updateImage = (id: string, updates: Partial<(typeof images)[0]>) => {
+    setImages(images.map((img) => (img.id === id ? { ...img, ...updates } : img)))
+  }
+
+  const deleteImage = (id: string) => {
+    setImages(images.filter((img) => img.id !== id))
+    setSelectedImage(null)
+  }
+
+  const resetAll = () => {
+    if (confirm('¿Estás seguro? Se eliminarán todos los diseños.')) {
+      setDesigns([])
+      setLines([])
+      setImages([])
+      setSelectedDesign(null)
+      setSelectedImage(null)
+      setShowTextEditor(false)
+      setShowImageUploader(false)
+    }
+  }
+
+  const currentDesigns = designs.filter((d) => d.type === view)
+  const currentLines = lines.filter((l) => l.type === view)
+  const currentImages = images.filter((img) => img.type === view)
+
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-center px-6 py-20 gap-12 sm:px-20 overflow-x-hidden">
-      <div className="flex flex-nowrap items-center justify-center gap-8 sm:gap-12">
-        <svg
-          className="h-16 w-16 sm:h-20 sm:w-20"
-          viewBox="0 0 180 180"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <mask
-            id="nextjs_icon_dark__mask0_408_139"
-            style={{ maskType: 'alpha' }}
-            maskUnits="userSpaceOnUse"
-            x="0"
-            y="0"
-            width="180"
-            height="180"
-          >
-            <circle cx="90" cy="90" r="90" fill="black" />
-          </mask>
-          <g mask="url(#nextjs_icon_dark__mask0_408_139)">
-            <circle cx="90" cy="90" r="87" fill="black" stroke="white" strokeWidth="6" />
-            <path
-              d="M149.508 157.52L69.142 54H54V125.97H66.1136V69.3836L139.999 164.845C143.333 162.614 146.509 160.165 149.508 157.52Z"
-              fill="url(#nextjs_icon_dark__paint0_linear_408_139)"
-            />
-            <rect
-              x="115"
-              y="54"
-              width="12"
-              height="72"
-              fill="url(#nextjs_icon_dark__paint1_linear_408_139)"
-            />
-          </g>
-          <defs>
-            <linearGradient
-              id="nextjs_icon_dark__paint0_linear_408_139"
-              x1="109"
-              y1="116.5"
-              x2="144.5"
-              y2="160.5"
-              gradientUnits="userSpaceOnUse"
-            >
-              <stop stopColor="white" />
-              <stop offset="1" stopColor="white" stopOpacity="0" />
-            </linearGradient>
-            <linearGradient
-              id="nextjs_icon_dark__paint1_linear_408_139"
-              x1="121"
-              y1="54"
-              x2="120.799"
-              y2="106.875"
-              gradientUnits="userSpaceOnUse"
-            >
-              <stop stopColor="white" />
-              <stop offset="1" stopColor="white" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-        </svg>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="sticky top-0 z-40 border-b bg-card">
+        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+                <span className="text-lg font-bold text-primary-foreground">
+                  <Shirt className="size-4" />
+                </span>
+              </div>
+              <h1 className="text-2xl font-bold text-foreground">Arte en Tela</h1>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={resetAll}
+                variant="outline"
+                size="sm"
+                className="gap-2 bg-transparent"
+              >
+                <RotateCcw className="h-4 w-4" />
+                <span className="hidden sm:inline">Resetear</span>
+              </Button>
+              <Button size="sm" className="gap-2">
+                <Download className="h-4 w-4" />
+                <span className="hidden sm:inline">Descargar</span>
+              </Button>
+              <ThemeToggle />
+            </div>
+          </div>
+        </div>
+      </header>
 
-        <h6 className="text-3xl font-bold">+</h6>
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* Canvas Area */}
+          <div className="lg:col-span-2 space-y-4">
+            {/* View Toggle */}
+            <div className="flex gap-2">
+              <Button
+                variant={view === 'front' ? 'default' : 'outline'}
+                onClick={() => setView('front')}
+                className="flex-1"
+              >
+                Frente
+              </Button>
+              <Button
+                variant={view === 'back' ? 'default' : 'outline'}
+                onClick={() => setView('back')}
+                className="flex-1"
+              >
+                Espalda
+              </Button>
+            </div>
 
-        <svg
-          className="h-16 w-16 sm:h-20 sm:w-20"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 256 256"
-        >
-          <path fill="none" d="M0 0h256v256H0z" />
-          <path
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="25"
-            strokeLinecap="round"
-            d="M208 128l-80 80M192 40L40 192"
-          />
-        </svg>
-      </div>
-
-      <div className="text-center max-w-xl mx-auto space-y-4">
-        <h2 className="text-2xl font-bold">Welcome to your Next.js + shadcn/ui starter!</h2>
-        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">
-          This is a clean starter template. Start building your project by editing
-          <code className="rounded bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 font-semibold">
-            app/page.tsx
-          </code>
-          .
-        </p>
-      </div>
-
-      <div className="flex flex-wrap gap-4 justify-center">
-        <Button asChild>
-          <a
-            href="https://github.com/jaycodev/next-shadcn-starter"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2"
-          >
-            <svg fill="currentColor" viewBox="0 0 24 24" className="w-5 h-5">
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M12 0C5.372 0 0 5.373 0 12c0 5.303 3.438 9.8 8.205 11.387.6.113.82-.26.82-.577v-2.165c-3.338.727-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.744.083-.729.083-.729 1.205.084 1.84 1.236 1.84 1.236 1.07 1.834 2.807 1.304 3.492.997.108-.775.419-1.304.762-1.604-2.665-.305-5.466-1.334-5.466-5.933 0-1.31.468-2.38 1.236-3.22-.124-.303-.536-1.524.117-3.176 0 0 1.008-.322 3.3 1.23a11.51 11.51 0 0 1 3.003-.404c1.02.004 2.045.138 3.003.404 2.29-1.552 3.296-1.23 3.296-1.23.656 1.652.244 2.873.12 3.176.77.84 1.236 1.91 1.236 3.22 0 4.61-2.804 5.625-5.475 5.921.43.37.815 1.096.815 2.21v3.277c0 .32.218.694.825.576C20.565 21.796 24 17.303 24 12c0-6.627-5.373-12-12-12z"
+            {/* Canvas */}
+            <div className="flex items-center justify-center rounded-lg bg-card p-6 sm:p-8">
+              <DesignCanvas
+                shirtColor={shirtColor}
+                neckline={neckline}
+                designs={currentDesigns}
+                selectedDesign={selectedDesign}
+                onSelectDesign={setSelectedDesign}
+                lines={currentLines}
+                images={currentImages}
+                selectedImage={selectedImage}
+                onSelectImage={setSelectedImage}
               />
-            </svg>
-            GitHub
-          </a>
-        </Button>
+            </div>
+          </div>
 
-        <Button variant="outline" asChild>
-          <a
-            href="https://github.com/jaycodev/next-shadcn-starter#readme"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2"
-          >
-            <FileText />
-            Readme
-          </a>
-        </Button>
-      </div>
+          {/* Sidebar */}
+          <div className="space-y-4">
+            {/* Shirt Color */}
+            <div className="rounded-lg border bg-card p-4">
+              <h3 className="mb-3 flex items-center gap-2 font-semibold text-foreground">
+                <Palette className="h-4 w-4" />
+                Color del Polo
+              </h3>
+              <ColorPicker
+                value={shirtColor}
+                onChange={setShirtColor}
+                colors={[
+                  '#ffffff',
+                  '#000000',
+                  '#ef4444',
+                  '#f97316',
+                  '#22c55e',
+                  '#0ea5e9',
+                  '#6366f1',
+                  '#ec4899',
+                ]}
+              />
+            </div>
 
-      <div className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8">
-        <ThemeToggle />
-      </div>
-    </main>
+            {/* Neckline */}
+            <div className="rounded-lg border bg-card p-4">
+              <h3 className="mb-3 font-semibold text-foreground">Tipo de Cuello</h3>
+              <NecklineSelector value={neckline} onChange={setNeckline} />
+            </div>
+
+            {/* Text Tool */}
+            <div className="rounded-lg border bg-card p-4">
+              <h3 className="mb-3 flex items-center gap-2 font-semibold text-foreground">
+                <Type className="h-4 w-4" />
+                Texto
+              </h3>
+              <Button
+                onClick={() => setShowTextEditor(!showTextEditor)}
+                variant="default"
+                className="w-full"
+              >
+                {showTextEditor ? 'Cancelar' : 'Agregar Texto'}
+              </Button>
+              {showTextEditor && (
+                <TextEditor onAdd={addText} onClose={() => setShowTextEditor(false)} />
+              )}
+            </div>
+
+            {/* Line Tool */}
+            <div className="rounded-lg border bg-card p-4">
+              <h3 className="mb-3 flex items-center gap-2 font-semibold text-foreground">
+                <Pen className="h-4 w-4" />
+                Líneas Rectas
+              </h3>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">Color</label>
+                  <div className="mt-2 flex gap-2">
+                    <input
+                      type="color"
+                      value={lineColor}
+                      onChange={(e) => setLineColor(e.target.value)}
+                      className="h-9 w-9 cursor-pointer rounded-md border border-border"
+                    />
+                    <span className="flex-1 rounded-md border border-border text-center text-xs font-mono leading-9">
+                      {lineColor}
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">
+                    Ancho: {lineWidth}px
+                  </label>
+                  <input
+                    type="range"
+                    min="1"
+                    max="10"
+                    value={lineWidth}
+                    onChange={(e) => setLineWidth(Number(e.target.value))}
+                    className="mt-2 w-full"
+                  />
+                </div>
+                <Button onClick={addLine} variant="default" className="w-full">
+                  Agregar Línea
+                </Button>
+              </div>
+            </div>
+
+            {/* Image Tool */}
+            <div className="rounded-lg border bg-card p-4">
+              <h3 className="mb-3 flex items-center gap-2 font-semibold text-foreground">
+                <ImageIcon className="h-4 w-4" />
+                Imagen
+              </h3>
+              <div className="space-y-3">
+                <label className="block">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="w-full text-muted-foreground file:border-input file:text-foreground p-0 pr-3 italic file:mr-3 file:h-full file:border-0 file:border-r file:border-solid file:bg-transparent file:px-3 file:text-sm file:font-medium file:not-italic"
+                  />
+                </label>
+              </div>
+            </div>
+
+            {/* Designs List */}
+            {currentDesigns.length > 0 && (
+              <div className="rounded-lg border bg-card p-4">
+                <h3 className="mb-3 font-semibold text-foreground">
+                  Textos ({currentDesigns.length})
+                </h3>
+                <div className="max-h-64 space-y-2 overflow-y-auto">
+                  {currentDesigns.map((design) => (
+                    <div
+                      key={design.id}
+                      onClick={() => setSelectedDesign(design.id)}
+                      className={`cursor-pointer rounded-lg border-2 p-3 transition-all ${
+                        selectedDesign === design.id
+                          ? 'border-primary bg-secondary'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium">{design.text}</p>
+                          <div className="mt-1 flex items-center gap-2">
+                            <div
+                              className="h-4 w-4 rounded border border-border"
+                              style={{ backgroundColor: design.color }}
+                            />
+                            <span className="text-xs text-muted-foreground">{design.size}px</span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            deleteDesign(design.id)
+                          }}
+                          className="text-destructive hover:text-destructive/80"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+
+                      {selectedDesign === design.id && (
+                        <div className="mt-3 space-y-3 border-t border-border pt-3">
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">
+                              Tamaño: {design.size}px
+                            </label>
+                            <input
+                              type="range"
+                              min="12"
+                              max="72"
+                              value={design.size}
+                              onChange={(e) =>
+                                updateDesign(design.id, { size: Number(e.target.value) })
+                              }
+                              className="mt-1 w-full"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">
+                              Color del texto
+                            </label>
+                            <div className="mt-2 flex gap-2">
+                              <input
+                                type="color"
+                                value={design.color}
+                                onChange={(e) => updateDesign(design.id, { color: e.target.value })}
+                                className="h-9 w-9 cursor-pointer rounded-md border border-border"
+                              />
+                              <div
+                                className="flex-1 rounded-md border border-border text-center text-xs font-mono leading-9"
+                                style={{
+                                  backgroundColor: design.color,
+                                  color: design.color === '#ffffff' ? '#000' : '#fff',
+                                }}
+                              >
+                                {design.color}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Lines List */}
+            {currentLines.length > 0 && (
+              <div className="rounded-lg border bg-card p-4">
+                <h3 className="mb-3 font-semibold text-foreground">
+                  Líneas ({currentLines.length})
+                </h3>
+                <div className="max-h-40 space-y-2 overflow-y-auto">
+                  {currentLines.map((line) => (
+                    <div
+                      key={line.id}
+                      className="rounded-lg border border-border p-2 flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="h-3 w-8 rounded border border-border"
+                          style={{ backgroundColor: line.color, height: `${line.width}px` }}
+                        />
+                        <span className="text-xs text-muted-foreground">{line.width}px</span>
+                      </div>
+                      <button
+                        onClick={() => deleteLine(line.id)}
+                        className="text-destructive hover:text-destructive/80"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Images List */}
+            {currentImages.length > 0 && (
+              <div className="rounded-lg border bg-card p-4">
+                <h3 className="mb-3 font-semibold text-foreground">
+                  Imágenes ({currentImages.length})
+                </h3>
+                <div className="max-h-48 space-y-2 overflow-y-auto">
+                  {currentImages.map((image) => (
+                    <div
+                      key={image.id}
+                      onClick={() => setSelectedImage(image.id)}
+                      className={`cursor-pointer rounded-lg border-2 p-2 transition-all ${
+                        selectedImage === image.id
+                          ? 'border-primary bg-secondary'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <img
+                          src={image.src || '/placeholder.svg'}
+                          alt="design"
+                          className="h-10 w-10 rounded-md object-cover"
+                        />
+                        <div className="flex-1 text-xs text-muted-foreground">
+                          <p>Tamaño: {image.size}px</p>
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            deleteImage(image.id)
+                          }}
+                          className="text-destructive hover:text-destructive/80"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+
+                      {selectedImage === image.id && (
+                        <div className="mt-3 border-t border-border pt-3">
+                          <label className="text-xs font-medium text-muted-foreground">
+                            Tamaño: {image.size}px
+                          </label>
+                          <input
+                            type="range"
+                            min="20"
+                            max="150"
+                            value={image.size}
+                            onChange={(e) =>
+                              updateImage(image.id, { size: Number(e.target.value) })
+                            }
+                            className="mt-1 w-full"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
+    </div>
   )
 }
