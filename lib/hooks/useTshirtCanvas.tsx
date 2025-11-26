@@ -106,6 +106,16 @@ export const useTshirtCanvas = ({ svgPath, view, onDesignUpdate }: UseTshirtCanv
   useEffect(() => {
     if (selectedView === view && fabricCanvasRef.current) {
       setActiveCanvas(fabricCanvasRef.current)
+      
+      const savedObjects = canvasStorageManager.loadCanvasObjects(view)
+      if (savedObjects) {
+        const canvas = fabricCanvasRef.current
+        canvas.clear()
+        savedObjects.forEach((obj: Record<string, unknown> & { type?: string }) =>
+          addFabricObject(canvas, obj)
+        )
+        canvas.renderAll()
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedView, dispatch, view])

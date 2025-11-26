@@ -16,7 +16,7 @@ const DesignArea = () => {
   const dispatch = useDispatch()
   const selectedType = useSelector((state: RootState) => state.tshirt.selectedType)
   const selectedView = useSelector((state: RootState) => state.tshirt.selectedView)
-  const { activeCanvas, setSelectedObject } = useCanvas()
+  const { setSelectedObject } = useCanvas()
 
   const getSvgPath = (view: 'front' | 'back') => {
     const tshirtType = TSHIRT_TYPES[selectedType as keyof typeof TSHIRT_TYPES]
@@ -25,10 +25,6 @@ const DesignArea = () => {
 
   const handleViewChange = (view: 'front' | 'back') => {
     if (view !== selectedView) {
-      if (activeCanvas) {
-        activeCanvas.discardActiveObject()
-        activeCanvas.renderAll()
-      }
       setSelectedObject(null)
       dispatch(setSelectedView(view))
     }
