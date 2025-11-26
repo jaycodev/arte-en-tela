@@ -35,38 +35,37 @@ const DesignArea = () => {
   }
 
   return (
-    <div className="flex flex-col items-center w-full gap-4">
-      <div className="flex justify-center w-full max-w-full overflow-hidden">
-        {selectedView === 'front' && (
-          <Card className="w-full max-w-md border-0 sm:border shadow-none">
-            <CardContent className="p-2 sm:p-6">
-              <TshirtCanvasFront svgPath={getSvgPath('front')} />
-            </CardContent>
-          </Card>
-        )}
-        {selectedView === 'back' && (
-          <Card className="w-full max-w-md border-0 sm:border shadow-none">
-            <CardContent className="p-2 sm:p-6">
-              <TshirtCanvasBack svgPath={getSvgPath('back')} />
-            </CardContent>
-          </Card>
-        )}
-      </div>
-      <div className="flex gap-2 sm:gap-4 w-full sm:w-auto justify-center">
+    <div className="flex flex-col items-center">
+      <div className="flex gap-4 mb-5">
         <Button
           onClick={() => handleViewChange('front')}
           variant={selectedView === 'front' ? 'default' : 'outline'}
-          className="flex-1 sm:flex-none text-sm"
         >
           Vista Frontal
         </Button>
         <Button
           onClick={() => handleViewChange('back')}
           variant={selectedView === 'back' ? 'default' : 'outline'}
-          className="flex-1 sm:flex-none text-sm"
         >
           Vista Trasera
         </Button>
+      </div>
+
+      <div className="flex justify-center">
+        {selectedView === 'front' && (
+          <Card>
+            <CardContent>
+              <TshirtCanvasFront svgPath={getSvgPath('front')} />
+            </CardContent>
+          </Card>
+        )}
+        {selectedView === 'back' && (
+          <Card>
+            <CardContent>
+              <TshirtCanvasBack svgPath={getSvgPath('back')} />
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   )

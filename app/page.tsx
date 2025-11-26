@@ -171,25 +171,22 @@ export default function Home() {
 
     // eslint-disable-next-line no-alert
     if (window.confirm('¿Estás seguro? Se eliminarán todos los diseños.')) {
-      // Clear both canvases
-      if (frontCanvas) {
+      if (frontCanvas && frontCanvas.clear) {
         frontCanvas.clear()
         frontCanvas.renderAll()
       }
-      if (backCanvas) {
+      if (backCanvas && backCanvas.clear) {
         backCanvas.clear()
         backCanvas.renderAll()
       }
 
-      // Clear all storage
       canvasStorageManager.clearCanvasStorage('all')
 
-      // Trigger sync to update textures
-      manualTriggerSync()
+      manualTriggerSync('front')
+      manualTriggerSync('back')
     }
   }
 
-  // Text editing handlers
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!selectedObject || !activeCanvas || selectedObject.type !== 'textbox') return
     const newText = e.target.value
@@ -343,10 +340,8 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Sidebar - Responsive: below on mobile, right side on desktop */}
           <div className="space-y-4 lg:sticky lg:top-20 lg:h-fit">
             <div className="rounded-lg border bg-card p-4 space-y-4 max-h-none lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
-              {/* Shirt Color */}
               <div>
                 <h3 className="mb-3 flex items-center gap-2 text-sm sm:text-base font-semibold text-foreground">
                   <Palette className="size-4" />
@@ -370,7 +365,6 @@ export default function Home() {
 
               <Separator />
 
-              {/* Neckline Type */}
               <div>
                 <Label className="mb-3 text-sm sm:text-base font-semibold text-foreground block">
                   Tipo de Cuello
@@ -394,7 +388,6 @@ export default function Home() {
 
               <Separator />
 
-              {/* Tools */}
               <div className="space-y-2 sm:space-y-3">
                 <h3 className="flex items-center gap-2 text-sm sm:text-base font-semibold text-foreground">
                   <Type className="h-4 w-4" />
@@ -440,7 +433,6 @@ export default function Home() {
                 )}
               </div>
 
-              {/* Text Editor - Solo aparece cuando hay texto seleccionado */}
               {selectedObject && selectedObject.type === 'textbox' && (
                 <>
                   <Separator />
@@ -508,7 +500,6 @@ export default function Home() {
                 </>
               )}
 
-              {/* Line Editor - Solo aparece cuando hay línea seleccionada */}
               {selectedObject && selectedObject.type === 'line' && (
                 <>
                   <Separator />
