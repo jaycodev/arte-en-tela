@@ -3,7 +3,9 @@ import { Inter } from 'next/font/google'
 import { ThemeProvider } from 'next-themes'
 import NextTopLoader from 'nextjs-toploader'
 
+import { StoreProvider } from '@/components/shared/store-provider'
 import { ThemeScript } from '@/components/shared/theme-script'
+import { CanvasProvider } from '@/lib/hooks/useCanvas'
 
 import './globals.css'
 
@@ -48,8 +50,17 @@ export default function RootLayout({
           disableTransitionOnChange
           enableColorScheme
         >
-          <NextTopLoader color="var(--primary)" height={2} easing="linear" showSpinner={false} />
-          {children}
+          <StoreProvider>
+            <CanvasProvider>
+              <NextTopLoader
+                color="var(--primary)"
+                height={2}
+                easing="linear"
+                showSpinner={false}
+              />
+              {children}
+            </CanvasProvider>
+          </StoreProvider>
         </ThemeProvider>
       </body>
     </html>
