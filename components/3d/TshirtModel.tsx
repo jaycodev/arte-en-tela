@@ -1,5 +1,7 @@
 'use client'
 
+/* eslint-disable react/no-unknown-property */
+
 import { useEffect, useRef } from 'react'
 
 import { Center, Decal, useGLTF, useTexture } from '@react-three/drei'

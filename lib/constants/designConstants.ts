@@ -24,8 +24,8 @@ export const TSHIRT_TYPES = {
 export const DEFAULT_TEXT_CONFIG = {
   fontSize: 20,
   fontFamily: 'arial',
-  originX: 'center',
-  originY: 'center',
+  originX: 'center' as const,
+  originY: 'center' as const,
   fill: 'black',
 }
 

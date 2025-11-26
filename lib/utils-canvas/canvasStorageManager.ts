@@ -1,3 +1,5 @@
+import * as fabric from 'fabric'
+
 export const STORAGE_KEYS = {
   FRONT_CANVAS: 'tshirt-designer-front',
   BACK_CANVAS: 'tshirt-designer-back',
@@ -5,7 +7,7 @@ export const STORAGE_KEYS = {
 
 const canvasStorageManager = {
   // Save canvas objects
-  saveCanvasObjects: (view: 'front' | 'back', canvas: any) => {
+  saveCanvasObjects: (view: 'front' | 'back', canvas: fabric.Canvas | null) => {
     if (!canvas) return
     try {
       const storageKey = view === 'front' ? STORAGE_KEYS.FRONT_CANVAS : STORAGE_KEYS.BACK_CANVAS
@@ -13,7 +15,7 @@ const canvasStorageManager = {
       // Clear existing design for this view before saving
       localStorage.removeItem(storageKey)
       // Get and save new objects
-      const objects = canvas.getObjects().map((obj: any) => obj.toJSON())
+      const objects = canvas.getObjects().map((obj: fabric.FabricObject) => obj.toJSON())
 
       localStorage.setItem(
         view === 'front' ? STORAGE_KEYS.FRONT_CANVAS : STORAGE_KEYS.BACK_CANVAS,

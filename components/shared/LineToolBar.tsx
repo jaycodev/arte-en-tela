@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 
+import * as fabric from 'fabric'
+
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
@@ -18,8 +20,9 @@ const LineToolBar = ({ manualSync }: LineToolBarProps) => {
 
   useEffect(() => {
     if (selectedObject && selectedObject.type === 'line') {
-      setColor((selectedObject as any).stroke || '#000000')
-      setStrokeWidth((selectedObject as any).strokeWidth || 3)
+      const line = selectedObject as fabric.Line
+      setColor((line.stroke as string) || '#000000')
+      setStrokeWidth(line.strokeWidth || 3)
     }
   }, [selectedObject])
 

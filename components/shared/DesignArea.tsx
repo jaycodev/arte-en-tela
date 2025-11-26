@@ -36,35 +36,37 @@ const DesignArea = () => {
   }
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center w-full">
       {/* Toggle Buttons */}
-      <div className="mb-5 flex gap-4">
+      <div className="mb-4 sm:mb-5 flex gap-2 sm:gap-4 w-full sm:w-auto justify-center">
         <Button
           onClick={() => handleViewChange('front')}
           variant={selectedView === 'front' ? 'default' : 'outline'}
+          className="flex-1 sm:flex-none text-sm"
         >
           Vista Frontal
         </Button>
         <Button
           onClick={() => handleViewChange('back')}
           variant={selectedView === 'back' ? 'default' : 'outline'}
+          className="flex-1 sm:flex-none text-sm"
         >
           Vista Trasera
         </Button>
       </div>
 
       {/* Conditional Rendering: Only show the selected canvas */}
-      <div className="flex justify-center">
+      <div className="flex justify-center w-full max-w-full overflow-hidden">
         {selectedView === 'front' && (
-          <Card>
-            <CardContent>
+          <Card className="w-full max-w-md border-0 sm:border">
+            <CardContent className="p-2 sm:p-6">
               <TshirtCanvasFront svgPath={getSvgPath('front')} />
             </CardContent>
           </Card>
         )}
         {selectedView === 'back' && (
-          <Card>
-            <CardContent>
+          <Card className="w-full max-w-md border-0 sm:border">
+            <CardContent className="p-2 sm:p-6">
               <TshirtCanvasBack svgPath={getSvgPath('back')} />
             </CardContent>
           </Card>

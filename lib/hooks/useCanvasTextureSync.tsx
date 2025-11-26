@@ -2,11 +2,13 @@
 
 import { useCallback, useEffect, useState } from 'react'
 
+import * as fabric from 'fabric'
+
 import { canvasSyncManager } from '@/lib/utils-canvas/canvasSyncManager'
 
 interface UseCanvasTextureSyncOptions {
-  frontCanvas: any | null
-  backCanvas: any | null
+  frontCanvas: fabric.Canvas | null
+  backCanvas: fabric.Canvas | null
   selectedView?: 'front' | 'back'
 }
 
@@ -24,7 +26,7 @@ export const useCanvasTextureSync = (
       back: { canvas: backCanvas, setter: setDesignTextureBack },
     }
 
-    const criticalEvents = ['object:modified', 'object:added', 'object:removed']
+    const criticalEvents = ['object:modified', 'object:added', 'object:removed'] as const
 
     const updateTexture = async (view: 'front' | 'back') => {
       const { canvas, setter } = canvasMap[view]
@@ -49,34 +51,30 @@ export const useCanvasTextureSync = (
     const debouncedUpdateFront = canvasSyncManager.debounce(() => updateTexture('front'), 100)
     const debouncedUpdateBack = canvasSyncManager.debounce(() => updateTexture('back'), 100)
 
-    // Setup events for front canvas
     if (frontCanvas) {
       criticalEvents.forEach((event) => {
-        frontCanvas.on(event, debouncedUpdateFront)
+        frontCanvas.on(event as keyof fabric.CanvasEvents, debouncedUpdateFront)
       })
     }
 
-    // Setup events for back canvas
     if (backCanvas) {
       criticalEvents.forEach((event) => {
-        backCanvas.on(event, debouncedUpdateBack)
+        backCanvas.on(event as keyof fabric.CanvasEvents, debouncedUpdateBack)
       })
     }
 
-    // Initial updates
     updateTexture('front')
     updateTexture('back')
 
-    // Cleanup
     return () => {
       if (frontCanvas) {
         criticalEvents.forEach((event) => {
-          frontCanvas.off(event, debouncedUpdateFront)
+          frontCanvas.off(event as keyof fabric.CanvasEvents, debouncedUpdateFront)
         })
       }
       if (backCanvas) {
         criticalEvents.forEach((event) => {
-          backCanvas.off(event, debouncedUpdateBack)
+          backCanvas.off(event as keyof fabric.CanvasEvents, debouncedUpdateBack)
         })
       }
     }

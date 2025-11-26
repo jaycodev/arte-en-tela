@@ -3,13 +3,11 @@ import * as fabric from 'fabric'
 import { STORAGE_KEYS } from './canvasStorageManager'
 
 export const canvasSyncManager = {
-  getCanvasTexture: (fabricCanvas: any) => {
+  getCanvasTexture: (fabricCanvas: fabric.Canvas | null) => {
     if (!fabricCanvas) return null
     try {
-      // Force a render before getting the texture
       fabricCanvas.renderAll()
 
-      // Use the upper canvas which contains the actual visible content
       const dataURL = fabricCanvas.toDataURL({
         format: 'png',
         quality: 1,
@@ -25,7 +23,7 @@ export const canvasSyncManager = {
   },
 
   getCanvasTextureFromStorage: (view: 'front' | 'back') => {
-    return new Promise((resolve) => {
+    return new Promise<string | null>((resolve) => {
       try {
         const storageKey = view === 'front' ? STORAGE_KEYS.FRONT_CANVAS : STORAGE_KEYS.BACK_CANVAS
 
@@ -43,10 +41,9 @@ export const canvasSyncManager = {
     })
   },
 
-  // utility function
-  debounce: (func: (...args: any[]) => void, wait: number) => {
+  debounce: <T extends unknown[]>(func: (...args: T) => void, wait: number) => {
     let timeout: NodeJS.Timeout
-    return function executedFunction(...args: any[]) {
+    return function executedFunction(...args: T) {
       const later = () => {
         clearTimeout(timeout)
         func(...args)

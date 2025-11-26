@@ -27,14 +27,12 @@ export const useTshirtCanvas = ({ svgPath, view, onDesignUpdate }: UseTshirtCanv
 
   const { setActiveCanvas, setSelectedObject, setFrontCanvas, setBackCanvas } = useCanvas()
 
-  // Function to save canvas objects
   const saveCanvas = () => {
     if (fabricCanvasRef.current) {
       canvasStorageManager.saveCanvasObjects(view, fabricCanvasRef.current)
     }
   }
 
-  // Function to notify design changes
   const notifyDesignChange = useCallback(() => {
     if (fabricCanvasRef.current && onDesignUpdate) {
       const textureDataUrl = canvasSyncManager.getCanvasTexture(fabricCanvasRef.current)
@@ -44,7 +42,6 @@ export const useTshirtCanvas = ({ svgPath, view, onDesignUpdate }: UseTshirtCanv
     }
   }, [onDesignUpdate])
 
-  // Initialize Fabric.js Canvas
   useEffect(() => {
     if (!canvasRef.current) return
 
@@ -62,30 +59,30 @@ export const useTshirtCanvas = ({ svgPath, view, onDesignUpdate }: UseTshirtCanv
       setActiveCanvas(canvas)
     }
 
-    // Save canvas data when the page is about to unload (refresh/close)
     window.addEventListener('beforeunload', saveCanvas)
 
-    // Load saved objects
     const savedObjects = canvasStorageManager.loadCanvasObjects(view)
     if (savedObjects) {
-      savedObjects.forEach((obj: any) => addFabricObject(canvas, obj))
+      savedObjects.forEach((obj: Record<string, unknown> & { type?: string }) =>
+        addFabricObject(canvas, obj)
+      )
       canvas.renderAll()
     }
 
-    // Handle Object Selection
-    canvas.on('selection:created', (e: any) => {
-      setSelectedObject(e.selected[0])
+    canvas.on('selection:created', (e) => {
+      const target = (e as { selected?: fabric.FabricObject[] }).selected?.[0]
+      if (target) setSelectedObject(target)
     })
 
-    canvas.on('selection:updated', (e: any) => {
-      setSelectedObject(e.selected[0])
+    canvas.on('selection:updated', (e) => {
+      const target = (e as { selected?: fabric.FabricObject[] }).selected?.[0]
+      if (target) setSelectedObject(target)
     })
 
     canvas.on('selection:cleared', () => {
       setSelectedObject(null)
     })
 
-    // Listen for any changes on the canvas
     canvas.on('object:modified', notifyDesignChange)
     canvas.on('object:added', notifyDesignChange)
     canvas.on('object:removed', notifyDesignChange)
@@ -103,16 +100,16 @@ export const useTshirtCanvas = ({ svgPath, view, onDesignUpdate }: UseTshirtCanv
       }
       setSelectedObject(null)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, view])
 
-  // Switch Active Canvas When View Changes
   useEffect(() => {
     if (selectedView === view && fabricCanvasRef.current) {
       setActiveCanvas(fabricCanvasRef.current)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedView, dispatch, view])
 
-  // Load SVG ClipPath & Saved Objects
   useEffect(() => {
     const canvas = fabricCanvasRef.current
     if (!canvas || !svgPath) return
@@ -135,7 +132,7 @@ export const useTshirtCanvas = ({ svgPath, view, onDesignUpdate }: UseTshirtCanv
   return { canvasRef, fabricCanvasRef, tshirtColor }
 }
 
-// Helper function to add objects to canvas
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const addFabricObject = (canvas: fabric.Canvas, objectData: any) => {
   switch (objectData.type) {
     case 'Line':

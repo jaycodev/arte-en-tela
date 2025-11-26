@@ -36,7 +36,6 @@ import {
   CANVAS_CONFIG,
   DEFAULT_TEXT_CONFIG,
   FONT_OPTIONS,
-  TSHIRT_COLOR_CODES,
   TSHIRT_TYPES,
 } from '@/lib/constants/designConstants'
 import { setSelectedType, setSelectedView, setTshirtColor } from '@/lib/features/tshirtSlice'
@@ -67,6 +66,9 @@ export default function Home() {
   const [textColor, setTextColor] = useState('#000000')
   const [font, setFont] = useState('arial')
   const [fontSize, setFontSize] = useState(20)
+
+  // Track all canvas objects for the list
+  const [canvasObjects, setCanvasObjects] = useState<fabric.FabricObject[]>([])
 
   // Handler para cambios de vista desde el modelo 3D
   const handle3DViewChange = (newView: 'front' | 'back') => {
@@ -169,6 +171,7 @@ export default function Home() {
   const resetAll = () => {
     if (!activeCanvas) return
 
+    // eslint-disable-next-line no-alert
     if (window.confirm('¿Estás seguro? Se eliminarán todos los diseños.')) {
       // Clear both canvases
       if (frontCanvas) {
@@ -193,8 +196,8 @@ export default function Home() {
     if (!selectedObject || !activeCanvas || selectedObject.type !== 'textbox') return
     const newText = e.target.value
     setText(newText)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ;(selectedObject as any).set('text', newText)
+    const textbox = selectedObject as fabric.Textbox
+    textbox.set('text', newText)
     activeCanvas.renderAll()
     manualTriggerSync()
   }
@@ -245,22 +248,40 @@ export default function Home() {
     manualTriggerSync()
   }
 
+  // Update canvas objects list
+  React.useEffect(() => {
+    if (activeCanvas) {
+      const updateObjects = () => {
+        const objects = activeCanvas.getObjects()
+        setCanvasObjects([...objects])
+      }
+
+      activeCanvas.on('object:added', updateObjects)
+      activeCanvas.on('object:removed', updateObjects)
+      activeCanvas.on('object:modified', updateObjects)
+
+      updateObjects()
+
+      return () => {
+        activeCanvas.off('object:added', updateObjects)
+        activeCanvas.off('object:removed', updateObjects)
+        activeCanvas.off('object:modified', updateObjects)
+      }
+    }
+  }, [activeCanvas])
+
   // Update local states when object is selected
   React.useEffect(() => {
     if (selectedObject && selectedObject.type === 'textbox') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setText((selectedObject as any).text || '')
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setTextColor((selectedObject as any).fill || '#000000')
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setFont((selectedObject as any).fontFamily || 'arial')
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setFontSize((selectedObject as any).fontSize || 20)
+      const textbox = selectedObject as fabric.Textbox
+      setText(textbox.text || '')
+      setTextColor((textbox.fill as string) || '#000000')
+      setFont(textbox.fontFamily || 'arial')
+      setFontSize(textbox.fontSize || 20)
     } else if (selectedObject && selectedObject.type === 'line') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setLineColor((selectedObject as any).stroke || '#000000')
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setLineWidth((selectedObject as any).strokeWidth || 2)
+      const line = selectedObject as fabric.Line
+      setLineColor((line.stroke as string) || '#000000')
+      setLineWidth(line.strokeWidth || 2)
     }
   }, [selectedObject])
 
@@ -268,25 +289,25 @@ export default function Home() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-40 border-b bg-card">
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between gap-4">
+        <div className="mx-auto max-w-7xl px-4 py-3 sm:py-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between gap-2 sm:gap-4">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                <Shirt className="size-4" />
+              <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-primary text-white">
+                <Shirt className="h-3 w-3 sm:h-4 sm:w-4" />
               </div>
-              <h1 className="text-2xl font-bold text-foreground">Arte en Tela</h1>
+              <h1 className="text-lg sm:text-2xl font-bold text-foreground">Arte en Tela</h1>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <Button
                 onClick={resetAll}
                 variant="outline"
                 size="sm"
-                className="gap-2 bg-transparent"
+                className="gap-1 sm:gap-2 bg-transparent px-2 sm:px-3"
               >
                 <RotateCcw className="h-4 w-4" />
                 <span className="hidden sm:inline">Resetear</span>
               </Button>
-              <Button size="sm" className="gap-2">
+              <Button size="sm" className="gap-1 sm:gap-2 px-2 sm:px-3">
                 <Download className="h-4 w-4" />
                 <span className="hidden sm:inline">Descargar</span>
               </Button>
@@ -297,13 +318,13 @@ export default function Home() {
       </header>
 
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-3">
           {/* Canvas Area */}
           <div className="lg:col-span-2 space-y-4">
             {/* 3D Viewer */}
-            <div className="rounded-lg border bg-card p-6">
-              <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-                <View className="h-5 w-5" />
+            <div className="rounded-lg border bg-card p-4 sm:p-6">
+              <h2 className="mb-4 flex items-center gap-2 text-base sm:text-lg font-semibold">
+                <View className="h-4 w-4 sm:h-5 sm:w-5" />
                 Vista 3D del Modelo
               </h2>
               <ThreeDViewer
@@ -315,54 +336,66 @@ export default function Home() {
             </div>
 
             {/* Design Area */}
-            <div className="rounded-lg border bg-card p-6">
-              <h2 className="mb-4 text-lg font-semibold">Área de Diseño</h2>
+            <div className="rounded-lg border bg-card p-4 sm:p-6">
+              <h2 className="mb-4 text-base sm:text-lg font-semibold">Área de Diseño</h2>
               <DesignArea />
             </div>
           </div>
 
-          {/* Sidebar - Right side with sticky scroll */}
-          <div className="space-y-4">
-            <div className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto rounded-lg border bg-card p-4">
+          {/* Sidebar - Responsive: below on mobile, right side on desktop */}
+          <div className="space-y-4 lg:sticky lg:top-20 lg:h-fit">
+            <div className="rounded-lg border bg-card p-4 space-y-4 max-h-none lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
               {/* Shirt Color */}
-              <div className="mb-4">
-                <h3 className="mb-3 flex items-center gap-2 font-semibold text-foreground">
+              <div>
+                <h3 className="mb-3 flex items-center gap-2 text-sm sm:text-base font-semibold text-foreground">
                   <Palette className="h-4 w-4" />
                   Color del Polo
                 </h3>
                 <ColorPicker
                   value={tshirtColor}
                   onChange={handleShirtColorChange}
-                  colors={TSHIRT_COLOR_CODES}
+                  colors={[
+                    '#ffffff',
+                    '#000000',
+                    '#ef4444',
+                    '#f97316',
+                    '#22c55e',
+                    '#0ea5e9',
+                    '#6366f1',
+                    '#ec4899',
+                  ]}
                 />
               </div>
 
-              <Separator className="my-4" />
+              <Separator />
 
               {/* Neckline Type */}
-              <div className="mb-4">
-                <Label className="mb-2 text-xs text-muted-foreground">Tipo de Cuello</Label>
-                <Select value={selectedType} onValueChange={handleTypeChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {Object.entries(TSHIRT_TYPES).map(([value, { name }]) => (
-                        <SelectItem key={value} value={value}>
-                          {name}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
+              <div>
+                <Label className="mb-3 text-sm sm:text-base font-semibold text-foreground block">
+                  Tipo de Cuello
+                </Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {Object.entries(TSHIRT_TYPES).map(([value, { name }]) => (
+                    <button
+                      key={value}
+                      onClick={() => handleTypeChange(value)}
+                      className={`flex flex-col items-center gap-1 rounded-lg border-2 px-2 py-2 sm:px-3 text-center transition-all ${
+                        selectedType === value
+                          ? 'border-primary bg-secondary'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <span className="text-xs font-medium">{name}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              <Separator className="my-4" />
+              <Separator />
 
               {/* Tools */}
-              <div className="space-y-3">
-                <h3 className="flex items-center gap-2 font-semibold text-foreground">
+              <div className="space-y-2 sm:space-y-3">
+                <h3 className="flex items-center gap-2 text-sm sm:text-base font-semibold text-foreground">
                   <Type className="h-4 w-4" />
                   Herramientas
                 </h3>
@@ -375,23 +408,31 @@ export default function Home() {
                   className="hidden"
                 />
 
-                <Button variant="outline" onClick={triggerFileInput} className="w-full gap-2">
+                <Button
+                  variant="outline"
+                  onClick={triggerFileInput}
+                  className="w-full gap-2 text-sm"
+                >
                   <ImageIcon className="h-4 w-4" />
                   Agregar Imagen
                 </Button>
 
-                <Button variant="outline" onClick={handleAddText} className="w-full gap-2">
+                <Button variant="outline" onClick={handleAddText} className="w-full gap-2 text-sm">
                   <Type className="h-4 w-4" />
                   Agregar Texto
                 </Button>
 
-                <Button variant="outline" onClick={handleAddLine} className="w-full gap-2">
+                <Button variant="outline" onClick={handleAddLine} className="w-full gap-2 text-sm">
                   <Slash className="h-4 w-4" />
                   Agregar Línea
                 </Button>
 
                 {selectedObject && (
-                  <Button onClick={handleDelete} variant="destructive" className="w-full gap-2">
+                  <Button
+                    onClick={handleDelete}
+                    variant="destructive"
+                    className="w-full gap-2 text-sm"
+                  >
                     <Trash2 className="h-4 w-4" />
                     Eliminar Selección
                   </Button>
@@ -401,9 +442,9 @@ export default function Home() {
               {/* Text Editor - Solo aparece cuando hay texto seleccionado */}
               {selectedObject && selectedObject.type === 'textbox' && (
                 <>
-                  <Separator className="my-4" />
-                  <div className="space-y-3">
-                    <Label className="text-lg font-bold">Editar Texto</Label>
+                  <Separator />
+                  <div className="space-y-2 sm:space-y-3">
+                    <Label className="text-base sm:text-lg font-bold">Editar Texto</Label>
 
                     <div>
                       <Label className="text-xs text-muted-foreground">Tu Texto</Label>
@@ -411,14 +452,14 @@ export default function Home() {
                         type="text"
                         value={text}
                         onChange={handleTextChange}
-                        className="mt-1"
+                        className="mt-1 text-sm"
                       />
                     </div>
 
                     <div>
                       <Label className="text-xs text-muted-foreground">Tipo de Fuente</Label>
                       <Select value={font} onValueChange={handleFontChange}>
-                        <SelectTrigger className="mt-1">
+                        <SelectTrigger className="mt-1 text-sm">
                           <SelectValue placeholder="Seleccionar Fuente" />
                         </SelectTrigger>
                         <SelectContent>
@@ -469,9 +510,9 @@ export default function Home() {
               {/* Line Editor - Solo aparece cuando hay línea seleccionada */}
               {selectedObject && selectedObject.type === 'line' && (
                 <>
-                  <Separator className="my-4" />
-                  <div className="space-y-3">
-                    <Label className="text-lg font-bold">Editar Línea</Label>
+                  <Separator />
+                  <div className="space-y-2 sm:space-y-3">
+                    <Label className="text-base sm:text-lg font-bold">Editar Línea</Label>
 
                     <div>
                       <Label className="text-xs text-muted-foreground">Color de Línea</Label>
@@ -496,6 +537,108 @@ export default function Home() {
                         onChange={handleLineWidthChange}
                         className="mt-1 w-full"
                       />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Lista de Elementos */}
+              {canvasObjects.length > 0 && (
+                <>
+                  <Separator />
+                  <div className="space-y-2 sm:space-y-3">
+                    <Label className="text-base sm:text-lg font-bold">
+                      Elementos ({canvasObjects.length})
+                    </Label>
+                    <div className="max-h-64 space-y-2 overflow-y-auto">
+                      {canvasObjects.map((obj, index) => {
+                        const objId = `obj-${index}`
+                        const isSelected = selectedObject === obj
+
+                        return (
+                          <div
+                            key={objId}
+                            onClick={() => {
+                              if (activeCanvas) {
+                                activeCanvas.setActiveObject(obj)
+                                activeCanvas.renderAll()
+                              }
+                            }}
+                            className={`cursor-pointer rounded-lg border-2 p-3 transition-all ${
+                              isSelected
+                                ? 'border-primary bg-secondary'
+                                : 'border-border hover:border-primary/50'
+                            }`}
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0 flex-1">
+                                {obj.type === 'textbox' && (
+                                  <>
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <Type className="h-4 w-4" />
+                                      <p className="truncate text-sm font-medium">
+                                        {(obj as fabric.Textbox).text || 'Texto'}
+                                      </p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <div
+                                        className="h-4 w-4 rounded border border-border"
+                                        style={{
+                                          backgroundColor:
+                                            ((obj as fabric.Textbox).fill as string) || '#000',
+                                        }}
+                                      />
+                                      <span className="text-xs text-muted-foreground">
+                                        {(obj as fabric.Textbox).fontSize || 20}px
+                                      </span>
+                                    </div>
+                                  </>
+                                )}
+                                {obj.type === 'image' && (
+                                  <div className="flex items-center gap-2">
+                                    <ImageIcon className="h-4 w-4" />
+                                    <p className="text-sm font-medium">Imagen</p>
+                                  </div>
+                                )}
+                                {obj.type === 'line' && (
+                                  <>
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <Slash className="h-4 w-4" />
+                                      <p className="text-sm font-medium">Línea</p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <div
+                                        className="h-3 w-8 rounded border border-border"
+                                        style={{
+                                          backgroundColor:
+                                            ((obj as fabric.Line).stroke as string) || '#000',
+                                          height: `${(obj as fabric.Line).strokeWidth || 2}px`,
+                                        }}
+                                      />
+                                      <span className="text-xs text-muted-foreground">
+                                        {(obj as fabric.Line).strokeWidth || 2}px
+                                      </span>
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  if (activeCanvas) {
+                                    activeCanvas.remove(obj)
+                                    activeCanvas.renderAll()
+                                    manualTriggerSync()
+                                  }
+                                }}
+                                className="text-destructive hover:text-destructive/80"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        )
+                      })}
                     </div>
                   </div>
                 </>

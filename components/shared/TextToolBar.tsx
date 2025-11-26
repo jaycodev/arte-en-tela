@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 
+import * as fabric from 'fabric'
+
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -30,10 +32,11 @@ const TextToolBar = ({ manualSync }: TextToolBarProps) => {
 
   useEffect(() => {
     if (selectedObject && selectedObject.type === 'textbox') {
-      setText((selectedObject as any).text || '')
-      setColor((selectedObject as any).fill || '#000000')
-      setFont((selectedObject as any).fontFamily || 'arial')
-      setFontSize((selectedObject as any).fontSize || 20)
+      const textbox = selectedObject as fabric.Textbox
+      setText(textbox.text || '')
+      setColor((textbox.fill as string) || '#000000')
+      setFont(textbox.fontFamily || 'arial')
+      setFontSize(textbox.fontSize || 20)
     }
   }, [selectedObject])
 
@@ -54,7 +57,8 @@ const TextToolBar = ({ manualSync }: TextToolBarProps) => {
     if (!selectedObject || !activeCanvas) return
     const newText = e.target.value
     setText(newText)
-    ;(selectedObject as any).set('text', newText)
+    const textbox = selectedObject as fabric.Textbox
+    textbox.set('text', newText)
     activeCanvas.renderAll()
     manualSync()
   }
