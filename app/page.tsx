@@ -61,16 +61,13 @@ export default function Home() {
   const [lineColor, setLineColor] = useState('#000000')
   const [lineWidth, setLineWidth] = useState(2)
 
-  // Text editing states
   const [text, setText] = useState('')
   const [textColor, setTextColor] = useState('#000000')
   const [font, setFont] = useState('arial')
   const [fontSize, setFontSize] = useState(20)
 
-  // Track all canvas objects for the list
   const [canvasObjects, setCanvasObjects] = useState<fabric.FabricObject[]>([])
 
-  // Handler para cambios de vista desde el modelo 3D
   const handle3DViewChange = (newView: 'front' | 'back') => {
     dispatch(setSelectedView(newView))
   }
@@ -293,9 +290,9 @@ export default function Home() {
           <div className="flex items-center justify-between gap-2 sm:gap-4">
             <div className="flex items-center gap-2">
               <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-primary text-white">
-                <Shirt className="h-3 w-3 sm:h-4 sm:w-4" />
+                <Shirt className="size-3 sm:h-4 sm:w-4" />
               </div>
-              <h1 className="text-lg sm:text-2xl font-bold text-foreground">Arte en Tela</h1>
+              <h1 className="text-lg font-bold text-foreground">Arte en Tela</h1>
             </div>
             <div className="flex items-center gap-1 sm:gap-2">
               <Button
