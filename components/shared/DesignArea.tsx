@@ -37,13 +37,13 @@ const DesignArea = () => {
           onClick={() => handleViewChange('front')}
           variant={selectedView === 'front' ? 'default' : 'outline'}
         >
-          Vista Frontal
+          Vista frontal
         </Button>
         <Button
           onClick={() => handleViewChange('back')}
           variant={selectedView === 'back' ? 'default' : 'outline'}
         >
-          Vista Trasera
+          Vista trasera
         </Button>
       </div>
 
