@@ -21,7 +21,7 @@ export function ThreeDViewer({
   onViewChange,
 }: ThreeDViewerProps) {
   return (
-    <div className="relative h-[400px] md:h-[560px] w-full rounded-lg overflow-hidden bg-card border">
+    <div className="relative h-[400px] md:h-[560px] w-full rounded-lg overflow-hidden bg-card">
       <Canvas>
         <OrbitControls maxPolarAngle={Math.PI / 2} minPolarAngle={Math.PI / 3} />
         <Suspense fallback={null}>
