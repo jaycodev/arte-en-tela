@@ -23,7 +23,7 @@ export const canvasSyncManager = {
   },
 
   getCanvasTextureFromStorage: (view: 'front' | 'back') => {
-    return new Promise<string | null>((resolve) => {
+    return new Promise<string | null>((resolve, reject) => {
       try {
         const storageKey = view === 'front' ? STORAGE_KEYS.FRONT_CANVAS : STORAGE_KEYS.BACK_CANVAS
 
@@ -33,10 +33,38 @@ export const canvasSyncManager = {
           return
         }
 
-        resolve(null)
+        const parsedObjects = JSON.parse(storedObjects)
+
+        const tempCanvas = new fabric.Canvas(null, {
+          width: 450,
+          height: 500,
+        })
+
+        fabric.util.enlivenObjects(
+          parsedObjects,
+          (objects: fabric.FabricObject[]) => {
+            // Add recreated objects to the canvas
+            objects.forEach((obj) => {
+              tempCanvas.add(obj)
+            })
+
+            const dataURL = tempCanvas.toDataURL({
+              format: 'png',
+              quality: 1,
+              multiplier: 1,
+              enableRetinaScaling: true,
+            })
+
+            resolve(dataURL)
+          },
+          (error: unknown) => {
+            console.error('Error enlivening objects:', error)
+            resolve(null)
+          }
+        )
       } catch (error) {
         console.error('Error retrieving canvas texture from storage:', error)
-        resolve(null)
+        reject(error)
       }
     })
   },
