@@ -31,25 +31,27 @@ const DesignArea = () => {
   }
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="flex gap-4 mb-5">
+    <div className="flex flex-col items-center w-full">
+      <div className="flex gap-2 sm:gap-4 mb-4 sm:mb-5 w-full justify-center">
         <Button
           onClick={() => handleViewChange('front')}
           variant={selectedView === 'front' ? 'default' : 'outline'}
+          className="text-xs sm:text-sm"
         >
           Vista frontal
         </Button>
         <Button
           onClick={() => handleViewChange('back')}
           variant={selectedView === 'back' ? 'default' : 'outline'}
+          className="text-xs sm:text-sm"
         >
           Vista trasera
         </Button>
       </div>
 
-      <div className="flex justify-center">
-        <Card className="shadow-none">
-          <CardContent>
+      <div className="flex justify-center w-full max-w-md sm:max-w-none">
+        <Card className="shadow-none w-full">
+          <CardContent className="p-2 sm:p-4">
             <div className={selectedView === 'front' ? 'block' : 'hidden'}>
               <TshirtCanvasFront svgPath={getSvgPath('front')} />
             </div>
