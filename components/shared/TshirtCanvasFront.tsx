@@ -14,7 +14,7 @@ const TshirtCanvasFront = ({ svgPath }: TshirtCanvasFrontProps) => {
   })
 
   return (
-    <div className="relative w-full aspect-square bg-background rounded-md overflow-hidden">
+    <div className="relative w-full h-auto">
       <div className="absolute inset-0 pointer-events-none">
         <svg viewBox="0 0 810 810" className="w-full h-full">
           <path d={svgPath} fill={tshirtColor} stroke="#000" strokeWidth="1" />
@@ -25,7 +25,6 @@ const TshirtCanvasFront = ({ svgPath }: TshirtCanvasFrontProps) => {
         className="absolute inset-0 z-10"
         width={CANVAS_CONFIG.width}
         height={CANVAS_CONFIG.height}
-        style={{ maxWidth: '100%', height: 'auto' }}
       />
     </div>
   )
