@@ -41,11 +41,11 @@ export function ThreeDViewer({
           left: 10,
           width: '100%',
           height: '100%',
-          background: 'rgba(255, 255, 255, 0.8)',
+          background: 'var(--background)',
           pointerEvents: 'none',
         }}
         dataStyles={{
-          color: '#000000',
+          color: 'var(--foreground)',
           fontSize: '14px',
           fontWeight: '500',
         }}
