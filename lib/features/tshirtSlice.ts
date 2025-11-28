@@ -4,12 +4,16 @@ interface TshirtState {
   selectedType: string
   tshirtColor: string
   selectedView: 'front' | 'back'
+  selectedSize: string
+  selectedFabric: string
 }
 
 const initialState: TshirtState = {
   selectedType: 'crew-neck',
   tshirtColor: '#FFFFFF',
   selectedView: 'front',
+  selectedSize: 'M',
+  selectedFabric: 'pima-cotton',
 }
 
 export const tshirtSlice = createSlice({
@@ -25,9 +29,21 @@ export const tshirtSlice = createSlice({
     setSelectedView: (state, action: PayloadAction<'front' | 'back'>) => {
       state.selectedView = action.payload
     },
+    setSelectedSize: (state, action: PayloadAction<string>) => {
+      state.selectedSize = action.payload
+    },
+    setSelectedFabric: (state, action: PayloadAction<string>) => {
+      state.selectedFabric = action.payload
+    },
   },
 })
 
-export const { setSelectedType, setTshirtColor, setSelectedView } = tshirtSlice.actions
+export const {
+  setSelectedType,
+  setTshirtColor,
+  setSelectedView,
+  setSelectedSize,
+  setSelectedFabric,
+} = tshirtSlice.actions
 
 export default tshirtSlice.reducer

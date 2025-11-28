@@ -4,12 +4,12 @@ import React, { useRef, useState } from 'react'
 
 import * as fabric from 'fabric'
 import {
-  Download,
   ImageIcon,
   Palette,
   Pencil,
   RotateCcw,
   Shirt,
+  ShoppingCart,
   Slash,
   Trash2,
   Type,
@@ -21,6 +21,13 @@ import { ThreeDViewer } from '@/components/3d/ThreeDViewer'
 import ColorPicker from '@/components/shared/color-picker'
 import DesignArea from '@/components/shared/DesignArea'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -36,13 +43,22 @@ import { ThemeToggle } from '@/components/ui/theme-toggle'
 import {
   CANVAS_CONFIG,
   DEFAULT_TEXT_CONFIG,
+  FABRIC_TYPES,
   FONT_OPTIONS,
+  TSHIRT_SIZES,
   TSHIRT_TYPES,
 } from '@/lib/constants/designConstants'
-import { setSelectedType, setSelectedView, setTshirtColor } from '@/lib/features/tshirtSlice'
+import {
+  setSelectedFabric,
+  setSelectedSize,
+  setSelectedType,
+  setSelectedView,
+  setTshirtColor,
+} from '@/lib/features/tshirtSlice'
 import { useCanvas } from '@/lib/hooks/useCanvas'
 import { useCanvasTextureSync } from '@/lib/hooks/useCanvasTextureSync'
 import type { RootState } from '@/lib/store'
+import { calculateTotalPrice } from '@/lib/utils'
 import canvasStorageManager from '@/lib/utils-canvas/canvasStorageManager'
 
 export default function Home() {
@@ -50,6 +66,8 @@ export default function Home() {
   const tshirtColor = useSelector((state: RootState) => state.tshirt.tshirtColor)
   const selectedView = useSelector((state: RootState) => state.tshirt.selectedView)
   const selectedType = useSelector((state: RootState) => state.tshirt.selectedType)
+  const selectedSize = useSelector((state: RootState) => state.tshirt.selectedSize)
+  const selectedFabric = useSelector((state: RootState) => state.tshirt.selectedFabric)
 
   const { frontCanvas, backCanvas, activeCanvas, selectedObject } = useCanvas()
   const { designTextureFront, designTextureBack, manualTriggerSync } = useCanvasTextureSync({
@@ -68,6 +86,37 @@ export default function Home() {
   const [fontSize, setFontSize] = useState(20)
 
   const [canvasObjects, setCanvasObjects] = useState<fabric.FabricObject[]>([])
+  const [showPurchasePreview, setShowPurchasePreview] = useState(false)
+
+  // Calcula el precio total del polo
+  const getTotalPrice = () => {
+    const imageCount = canvasObjects.filter((obj) => obj.type === 'image').length
+    const textCount = canvasObjects.filter((obj) => obj.type === 'textbox').length
+    const priceData = calculateTotalPrice(selectedFabric, imageCount, textCount)
+    return priceData.total
+  }
+
+  // Obtiene los detalles de la compra
+  const getPurchaseDetails = () => {
+    const imageCount = canvasObjects.filter((obj) => obj.type === 'image').length
+    const textCount = canvasObjects.filter((obj) => obj.type === 'textbox').length
+    const priceData = calculateTotalPrice(selectedFabric, imageCount, textCount)
+
+    const fabricLabel =
+      FABRIC_TYPES[selectedFabric as keyof typeof FABRIC_TYPES]?.label || 'Desconocido'
+    const sizeLabel = TSHIRT_SIZES[selectedSize as keyof typeof TSHIRT_SIZES]?.label || 'M'
+    const neckLabel =
+      TSHIRT_TYPES[selectedType as keyof typeof TSHIRT_TYPES]?.name || 'Cuello Redondo'
+
+    return {
+      fabricLabel,
+      sizeLabel,
+      neckLabel,
+      imageCount,
+      textCount,
+      priceData,
+    }
+  }
 
   const handle3DViewChange = (newView: 'front' | 'back') => {
     dispatch(setSelectedView(newView))
@@ -79,6 +128,14 @@ export default function Home() {
 
   const handleTypeChange = (value: string) => {
     dispatch(setSelectedType(value))
+  }
+
+  const handleSizeChange = (value: string) => {
+    dispatch(setSelectedSize(value))
+  }
+
+  const handleFabricChange = (value: string) => {
+    dispatch(setSelectedFabric(value))
   }
 
   const triggerFileInput = () => {
@@ -302,9 +359,13 @@ export default function Home() {
                 <RotateCcw className="h-4 w-4" />
                 <span className="hidden sm:inline">Resetear</span>
               </Button>
-              <Button size="sm" className="gap-1 sm:gap-2 px-2 sm:px-3">
-                <Download className="h-4 w-4" />
-                <span className="hidden sm:inline">Descargar</span>
+              <Button
+                onClick={() => setShowPurchasePreview(true)}
+                size="sm"
+                className="gap-1 sm:gap-2 px-2 sm:px-3"
+              >
+                <ShoppingCart className="h-4 w-4" />
+                <span className="hidden sm:inline">Comprar</span>
               </Button>
               <ThemeToggle />
             </div>
@@ -342,6 +403,18 @@ export default function Home() {
 
           <div className="space-y-4 lg:sticky lg:top-20 lg:h-fit">
             <div className="rounded-lg border bg-card p-4 space-y-4 max-h-none lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
+              <div className="bg-secondary rounded-lg p-4 space-y-2">
+                <h3 className="text-sm font-semibold text-foreground">Precio Total</h3>
+                <div className="flex items-baseline justify-between">
+                  <span className="text-xs text-muted-foreground">Subtotal:</span>
+                  <span className="text-lg font-bold text-primary">
+                    S/ {getTotalPrice().toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              <Separator />
+
               <div>
                 <h3 className="mb-3 flex items-center gap-2 text-sm sm:text-base font-semibold text-foreground">
                   <Palette className="size-4" />
@@ -384,6 +457,51 @@ export default function Home() {
                     </button>
                   ))}
                 </div>
+              </div>
+
+              <Separator />
+
+              <div>
+                <Label className="mb-3 text-sm sm:text-base font-semibold text-foreground block">
+                  Talla
+                </Label>
+                <div className="grid grid-cols-4 gap-2">
+                  {Object.entries(TSHIRT_SIZES).map(([value, { label }]) => (
+                    <button
+                      key={value}
+                      onClick={() => handleSizeChange(value)}
+                      className={`flex items-center justify-center gap-1 rounded-lg border-2 px-2 py-2 sm:px-3 text-center transition-all cursor-pointer font-medium ${
+                        selectedSize === value
+                          ? 'border-primary bg-secondary'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <span className="text-sm">{label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <Separator />
+
+              <div>
+                <Label className="mb-3 text-sm sm:text-base font-semibold text-foreground block">
+                  Tipo de Tela
+                </Label>
+                <Select value={selectedFabric} onValueChange={handleFabricChange}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Seleccionar tela" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {Object.entries(FABRIC_TYPES).map(([value, { label, basePrice }]) => (
+                        <SelectItem key={value} value={value}>
+                          {label} - S/ {basePrice.toFixed(2)}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
               </div>
 
               <Separator />
@@ -452,7 +570,7 @@ export default function Home() {
                     <div>
                       <Label className="text-xs text-muted-foreground">Tipo de Fuente</Label>
                       <Select value={font} onValueChange={handleFontChange}>
-                        <SelectTrigger className="mt-1 text-sm">
+                        <SelectTrigger className="mt-1 w-full">
                           <SelectValue placeholder="Seleccionar Fuente" />
                         </SelectTrigger>
                         <SelectContent>
@@ -639,6 +757,84 @@ export default function Home() {
           </div>
         </div>
       </main>
+
+      {/* Purchase Preview Dialog */}
+      <Dialog open={showPurchasePreview} onOpenChange={setShowPurchasePreview}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Resumen de tu Compra</DialogTitle>
+            <DialogDescription>
+              Verifica los detalles de tu pedido antes de continuar
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {(() => {
+              const details = getPurchaseDetails()
+              return (
+                <>
+                  <div className="rounded-lg bg-secondary p-4 space-y-3">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Tamaño</p>
+                        <p className="font-semibold">{details.sizeLabel}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Cuello</p>
+                        <p className="font-semibold">{details.neckLabel}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Color</p>
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="h-6 w-6 rounded border border-border"
+                            style={{ backgroundColor: tshirtColor }}
+                          />
+                          <p className="font-semibold">{tshirtColor}</p>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Tela</p>
+                        <p className="font-semibold">{details.fabricLabel}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-sm">Detalles del Diseño</h4>
+                    <div className="text-sm text-muted-foreground space-y-1">
+                      <p>• Imágenes: {details.imageCount}</p>
+                      <p>• Textos: {details.textCount}</p>
+                      <p>• Elementos totales: {canvasObjects.length}</p>
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-4">
+                    <div className="flex justify-between items-center mb-4">
+                      <span className="font-semibold">Total:</span>
+                      <span className="text-2xl font-bold text-primary">
+                        S/ {details.priceData.total.toFixed(2)}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{details.priceData.details}</p>
+                  </div>
+                </>
+              )
+            })()}
+          </div>
+
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowPurchasePreview(false)}
+              className="flex-1"
+            >
+              Continuar Editando
+            </Button>
+            <Button className="flex-1">Comprar Ahora</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

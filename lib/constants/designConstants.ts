@@ -53,3 +53,45 @@ export const FONT_OPTIONS = [
   { value: 'trebuchet-ms', label: 'Trebuchet MS' },
   { value: 'impact', label: 'Impact' },
 ]
+
+export const TSHIRT_SIZES = {
+  S: { label: 'S', value: 'S' },
+  M: { label: 'M', value: 'M' },
+  L: { label: 'L', value: 'L' },
+  XL: { label: 'XL', value: 'XL' },
+}
+
+export const FABRIC_TYPES = {
+  'pima-cotton': {
+    label: 'Algodón Pima',
+    basePrice: 35.0,
+  },
+  'jersey-cotton': {
+    label: 'Algodón Jersey',
+    basePrice: 28.0,
+  },
+  'cotton-30-1': {
+    label: 'Algodón 30/1',
+    basePrice: 25.0,
+  },
+  'combed-cotton-24-1': {
+    label: 'Algodón Peinado 24/1',
+    basePrice: 30.0,
+  },
+  'dry-fit': {
+    label: 'Dry Fit',
+    basePrice: 27.0,
+  },
+}
+
+export const DESIGN_PRICES = {
+  smallSticker: 4.0,
+  detailedSticker: 6.0,
+  mediumDesign: 8.0,
+  smallPhoto: 8.0,
+  mediumPhoto: 12.0,
+  largePhoto: 18.0,
+  shortName: 3.0,
+  phrase: 6.0,
+  largeText: 10.0,
+}
