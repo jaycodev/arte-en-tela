@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   title: 'Arte en Tela - Diseña tu Polo',
   description: '',
   icons: {
-    icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
+    icon: [{ url: '/icons/favicon.svg', type: 'image/svg+xml' }],
   },
 }
 
